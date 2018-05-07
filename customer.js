@@ -26,13 +26,13 @@ function listItems() {
         queryUser();
     });
 }
-
+console.log("\nWelcome to Bamazon!  The place where all your sporting needs are met!\n")
 function queryUser() {
     inquirer
         .prompt([{
             name: "query",
             type: "list",
-            message: "Please choose from the following options",
+            message: "Please choose from the following options:",
             choices: ["Purchase products", "See Inventory", "Exit"]
         }]).then(function (inquirerResponse) {
 
@@ -152,13 +152,21 @@ function keepShopping() {
 
 function exitStore() {
     console.log("\nThank you for shopping!");
-    console.log("Here's your receipt:");
-
+    
     connection.query("SELECT * FROM shopping_cart", function (err, res) {
-        if (err) throw err;
+      if (err) throw err;
+      // console.log("Number of Lines = " + res.length);
+      // console.log(res[0].total);
+      if (res.length > 0){
+        console.log("Here's your receipt:\n");
+        let totalPrice = 0;
+        for (i=0; i<res.length; i++){
+          totalPrice += res[i].total;
+        }
         console.table(res);
+        console.log("Total Price = $" + parseFloat(totalPrice).toFixed(2));
+      }
     });
-
     // Clear the order for the next customer
     connection.query("TRUNCATE TABLE shopping_cart", function (err, res) {
         if (err) throw err;
