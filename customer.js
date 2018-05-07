@@ -62,7 +62,7 @@ function userPurchase() {
       .prompt([{
         name: "id",
         type: "input",
-        message: "Please select the item's ID you would like to purchase.",
+        message: "Please input the item's ID you would like to purchase.",
         choices: console.table(res),
         validate: function (value) {
           var numL = res.length;
@@ -128,12 +128,13 @@ function keepShopping() {
   inquirer
     .prompt([{
       name: "continue",
-      type: "confirm",
-      message: "Anything else we can help you with?\n"
+      type: "list",
+      message: "Anything else we can help you with?",
+      choices: ["Keep shopping", "Exit"]
     }])
     .then(function (inquirerResponse) {
 
-      if (inquirerResponse.continue === true) {
+      if (inquirerResponse.continue === "Keep shopping") {
 
         queryUser();
       } else {
@@ -144,6 +145,6 @@ function keepShopping() {
 }
 
 function exitStore() {
-  console.log("Thank you for shopping!");
+  console.log("\nThank you for shopping!");
   connection.end();
 }
