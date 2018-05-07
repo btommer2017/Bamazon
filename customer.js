@@ -19,9 +19,8 @@ connection.connect(function (err) {
   queryUser();
 });
 
-
 function listItems() {
-  connection.query("SELECT id, product_name, price FROM products", function (err, res) {
+  connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
     console.table(res);
     queryUser();
@@ -37,8 +36,7 @@ function queryUser() {
       message: "Please choose from the following options",
       choices: ["See Inventory", "Purchase products", "Exit"]
     }]).then(function (inquirerResponse) {
-      console.log(inquirerResponse.query);
-
+      
       switch (inquirerResponse.query) {
 
         case 'See Inventory':
@@ -54,83 +52,85 @@ function queryUser() {
           break;
       }
     });
-
 }
-
-
-
 
 function userPurchase() {
 
   connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
-    // console.log("These are the results before user input and no table");
-    // console.log(res[0].id);
-    // console.log(res[0].product_name);
-    // console.log(res[0].price);
-    // console.log(res[0].stock_quantity);
-    // console.log("###################################################################################3");
-    inquirer
+    console.log(res.length + "console.log the length");
+      inquirer
       .prompt([{
           name: "id",
           type: "input",
           message: "Please select the item's ID you would like to purchase.",
-          choices: console.table(res)
+          choices: console.table(res),
+          validate: function(value) {
+              var numL = res.length;
+            if (value <= numL && value >0) {
+             return true;
+            }
+             console.log("\n\nPlease enter a valid ID.\n");
+             return false;
+          }
           }
       ])
       .then(function(inquirerResponse){
         var num = (inquirerResponse.id - 1);
-        console.log(`Num = ${num}`);
         inquirer
         .prompt([{
-
           name: "quantity",
           type: "input",
-          message: "How many would you like to purchase? \n",
-
+          message: "How many would you like to purchase?",
           validate: function(value) {
             var stockQuan = res[num].stock_quantity+1;
             if ((value < stockQuan) && (value > 0)) {
               return true;
             }
-            // console.log("\nError: 0dddddddddddddddddddd ");
-            console.log("\nPlease enter a valid amount");
-            // console.log("Error: 1dddddddddddddddddddd ");
-            // console.log("Error: 2dddddddddddddddddddd ");
-            // console.log("Error: 3dddddddddddddddddddd ");
-            console.log("")
-            return false;
+             console.log("\n\nPlease enter a valid amount.\n");
+             return false;
           }
 
         }])
     
       .then(function (inquirerResponse) {
-        //   if(inquirerResponse.l)
-        // var num = (inquirerResponse.id - 1);
         var quan = (inquirerResponse.quantity);
         var each = res[num].price;
         var cost = quan * each;
-        // console.log(num);
-        // console.log(inquirerResponse.id);
-        // console.log(inquirerResponse.quantity);
-        // console.log(`Item: ${res[num].product_name}, Quantity: ${quan}. Total Cost: $${cost}  `);
-        console.log(`Item: ${res[num].product_name}`);
+        console.log(`\nItem: ${res[num].product_name}`);
         console.log(`Quantity: ${quan}`);
         console.log(`Cost per item: $${each}`);
-        console.log(`Total Cost: $${cost}`);
-        // console.log(inquirerResponse.purchase);
-        // console.log(inquirerResponse.quantity);
-        // console.log("so far stuff is sorta working");
-        connection.end();
+        console.log(`Total Cost: $${cost}\n`);
+
+        keepShopping();
 
       })
   })
 })
 }
 
+function keepShopping(){
+    inquirer
+        .prompt([{
+          name: "continue",
+          type: "confirm",
+          message: "Anything else we can help you with?\n"
+}])
+.then(function (inquirerResponse){
+   
+if (inquirerResponse.continue === true) {
+    
+   queryUser();
+}
+else
+{
+console.log("");
+exitStore();
+}
+});
+}
 
 function exitStore() {
   console.log("Thank you for shopping!");
   connection.end();
-
 }
