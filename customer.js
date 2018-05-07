@@ -36,7 +36,7 @@ function queryUser() {
       message: "Please choose from the following options",
       choices: ["See Inventory", "Purchase products", "Exit"]
     }]).then(function (inquirerResponse) {
-      
+
       switch (inquirerResponse.query) {
 
         case 'See Inventory':
@@ -58,76 +58,89 @@ function userPurchase() {
 
   connection.query("SELECT * FROM products", function (err, res) {
     if (err) throw err;
-    console.log(res.length + "console.log the length");
-      inquirer
+    inquirer
       .prompt([{
-          name: "id",
-          type: "input",
-          message: "Please select the item's ID you would like to purchase.",
-          choices: console.table(res),
-          validate: function(value) {
-              var numL = res.length;
-            if (value <= numL && value >0) {
-             return true;
-            }
-             console.log("\n\nPlease enter a valid ID.\n");
-             return false;
+        name: "id",
+        type: "input",
+        message: "Please select the item's ID you would like to purchase.",
+        choices: console.table(res),
+        validate: function (value) {
+          var numL = res.length;
+          if (value <= numL && value > 0 && res[value - 1].stock_quantity > 0) {
+            console.log("\n\nProduct: " + res[value - 1].product_name + "\nPrice: $" + res[value - 1].price + "\nQuantity Available: " + res[value - 1].stock_quantity + "\n");
+            return true;
           }
-          }
-      ])
-      .then(function(inquirerResponse){
+          console.log("\n\nThe ID you chose is either out of stock, or invalid, please make another selection.\n");
+
+          //  console.log(res[value].stock_quantity + " current quantity");
+          return false;
+
+        }
+      }])
+      .then(function (inquirerResponse) {
         var num = (inquirerResponse.id - 1);
         inquirer
-        .prompt([{
-          name: "quantity",
-          type: "input",
-          message: "How many would you like to purchase?",
-          validate: function(value) {
-            var stockQuan = res[num].stock_quantity+1;
-            if ((value < stockQuan) && (value > 0)) {
-              return true;
+          .prompt([{
+            name: "quantity",
+            type: "input",
+            message: "How many would you like to purchase?",
+            validate: function (value) {
+              stockQuan = res[num].stock_quantity;
+
+              if ((value <= stockQuan) && (value > 0)) {
+                return true;
+              }
+              console.log("\n\nPlease enter a valid amount.\n");
+              return false;
             }
-             console.log("\n\nPlease enter a valid amount.\n");
-             return false;
-          }
 
-        }])
-    
-      .then(function (inquirerResponse) {
-        var quan = (inquirerResponse.quantity);
-        var each = res[num].price;
-        var cost = quan * each;
-        console.log(`\nItem: ${res[num].product_name}`);
-        console.log(`Quantity: ${quan}`);
-        console.log(`Cost per item: $${each}`);
-        console.log(`Total Cost: $${cost}\n`);
+          }])
 
-        keepShopping();
+          .then(function (inquirerResponse) {
+            var quan = (inquirerResponse.quantity);
+            var each = res[num].price;
+            var cost = quan * each;
+            console.log(`\nItem: ${res[num].product_name}`);
+            console.log(`Quantity: ${quan}`);
+            console.log(`Cost per item: $${each}`);
+            console.log(`Total Cost: $${cost}\n`);
+            connection.query(
+              "UPDATE products SET ? WHERE ?", [{
+                  stock_quantity: (stockQuan - quan)
+                },
+                {
+                  id: (num + 1)
+                }
+              ],
+              function (error) {
+                if (error) throw err;
+              }
+            );
 
+            keepShopping();
+
+          })
       })
   })
-})
 }
 
-function keepShopping(){
-    inquirer
-        .prompt([{
-          name: "continue",
-          type: "confirm",
-          message: "Anything else we can help you with?\n"
-}])
-.then(function (inquirerResponse){
-   
-if (inquirerResponse.continue === true) {
-    
-   queryUser();
-}
-else
-{
-console.log("");
-exitStore();
-}
-});
+function keepShopping() {
+  inquirer
+    .prompt([{
+      name: "continue",
+      type: "confirm",
+      message: "Anything else we can help you with?\n"
+    }])
+    .then(function (inquirerResponse) {
+
+      if (inquirerResponse.continue === true) {
+
+        queryUser();
+      } else {
+        console.log("");
+        exitStore();
+      }
+    });
 }
 
 function exitStore() {
