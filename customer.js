@@ -33,7 +33,7 @@ function queryUser() {
             name: "query",
             type: "list",
             message: "Please choose from the following options:",
-            choices: ["Purchase products", "See Inventory", "Exit"]
+            choices: ["Purchase Products", "View Inventory", "Exit"]
         }]).then(function (inquirerResponse) {
 
             switch (inquirerResponse.query) {
