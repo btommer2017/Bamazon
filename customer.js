@@ -101,7 +101,7 @@ function userPurchase() {
                         console.log(`\nItem: ${res[num].product_name}`);
                         console.log(`Quantity: ${quan}`);
                         console.log(`Cost per item: $${each}`);
-                        console.log(`Total Cost: $${cost}\n`);
+                        console.log(`Total Cost: $${parseFloat(cost).toFixed(2)}\n`);
                         connection.query(
                             "UPDATE products SET ? WHERE ?", [{
                                     stock_quantity: (stockQuan - quan)
