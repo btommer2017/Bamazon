@@ -1,1 +1,1 @@
-# Bamazon
+Welcome to Bamazon!  The place where all your sporting needs are met!
