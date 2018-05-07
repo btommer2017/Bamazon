@@ -38,11 +38,11 @@ function queryUser() {
 
             switch (inquirerResponse.query) {
 
-                case 'See Inventory':
+                case 'View Inventory':
                     listItems();
                     break;
 
-                case 'Purchase products':
+                case 'Purchase Products':
                     userPurchase();
                     break;
 
